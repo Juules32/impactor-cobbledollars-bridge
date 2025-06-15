@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "impactor-cobble-dollars-bridge",
+  "id": "impactor-cobbledollars-bridge",
   "version": "${version}",
   "name": "ImpactorCobbleDollarsBridge",
   "authors": [
