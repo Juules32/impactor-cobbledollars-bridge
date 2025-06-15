@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "id": "impactor",
+  "id": "impactor-cobble-dollars-bridge",
   "version": "${version}",
-  "name": "Impactor",
+  "name": "ImpactorCobbleDollarsBridge",
   "authors": [
-    "NickImpact"
+    "Juules32"
   ],
   "license": "MIT",
   "environment": "*",

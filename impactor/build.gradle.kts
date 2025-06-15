@@ -19,7 +19,7 @@ dependencies {
     api(project(":api:storage"))
     api(project(":api:text"))
     api(project(":api:translations"))
-
+    
     api("net.impactdev.impactor.api:commands:5.3.1+1.21.1") {
         exclude("net.impactdev.impactor.api", "core")
         exclude("net.impactdev.impactor.api", "items")
@@ -53,6 +53,8 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.2")
     testImplementation("org.mockito:mockito-core:5.2.0")
     testRuntimeOnly("org.apache.logging.log4j:log4j-core:2.20.0")
+
+    implementation(project(":minecraft:api"))
 }
 
 tasks.withType(Test::class) {

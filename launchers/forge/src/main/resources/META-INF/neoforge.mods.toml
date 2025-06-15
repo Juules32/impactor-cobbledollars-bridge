@@ -5,7 +5,7 @@ license = "MIT"
 [[mods]]
 modId = "impactor"
 version = "${version}"
-displayName = "Impactor"
+displayName = "ImpactorCobbleDollarsBridge"
 description = "General Purpose Minecraft API"
 
 [[dependencies.impactor]]

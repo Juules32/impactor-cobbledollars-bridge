@@ -41,14 +41,14 @@ tasks {
 
         inputFile.set(shadowJar.flatMap { it.archiveFile })
 
-        archiveBaseName.set("Impactor-${project.name.capitalize()}")
+        archiveBaseName.set("ImpactorCobbleDollarsBridge-${project.name.capitalize()}")
         archiveVersion.set(writeVersion(true))
     }
 
     val minecraft = rootProject.property("minecraft")
 
     shadowJar {
-        archiveBaseName.set("Impactor-${project.name}")
+        archiveBaseName.set("ImpactorCobbleDollarsBridge-${project.name}")
         archiveClassifier.set("dev-shadow")
 
         dependencies {
@@ -123,7 +123,7 @@ tasks {
     }
 
     remapJar {
-        archiveBaseName.set("Impactor-${project.name.capitalize()}")
+        archiveBaseName.set("ImpactorCobbleDollarsBridge-${project.name.capitalize()}")
         archiveVersion.set("${minecraft}-${rootProject.version}")
     }
 }

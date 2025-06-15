@@ -31,3 +31,10 @@ run
 
 /impactor/config/impactor/translations/*.conf
 /impactor/config/impactor/*.conf
+
+minecraft/impl/config
+minecraft/impl/logs
+
+!libs/CobbleDollars*
+
+.vscode

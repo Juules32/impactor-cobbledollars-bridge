@@ -37,9 +37,9 @@ tasks {
 
     jar {
         if(project.parent?.name.equals("api")) {
-            archiveBaseName.set("Impactor-API-${project.name.substring(0, 1).toUpperCase()}${project.name.substring(1)}")
+            archiveBaseName.set("ImpactorCobbleDollarsBridge-API-${project.name.substring(0, 1).toUpperCase()}${project.name.substring(1)}")
         } else {
-            archiveBaseName.set("Impactor-${project.name.substring(0, 1).toUpperCase()}${project.name.substring(1)}")
+            archiveBaseName.set("ImpactorCobbleDollarsBridge-${project.name.substring(0, 1).toUpperCase()}${project.name.substring(1)}")
         }
         archiveClassifier.set("dev-slim")
     }

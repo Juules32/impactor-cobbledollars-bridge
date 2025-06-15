@@ -17,7 +17,7 @@ plugins {
     id("ca.stellardrift.polyglot-version-catalogs") version "6.1.0"
 }
 
-rootProject.name = "Impactor"
+rootProject.name = "ImpactorCobbleDollarsBridge"
 
 include("api:core")
 include("api:config")

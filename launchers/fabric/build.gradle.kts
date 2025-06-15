@@ -49,7 +49,18 @@ dependencies {
     modRuntimeOnly("me.lucko:fabric-permissions-api:0.2-SNAPSHOT")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.1")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.1")
+
+    modImplementation("net.fabricmc:fabric-language-kotlin:1.12.3+kotlin.2.0.21")
+    modImplementation("net.fabricmc.fabric-api:fabric-api:0.115.1+1.21.1")
+    modImplementation("com.cobblemon:fabric:1.6.1+1.21.1")
+
+	modImplementation(files("../../libs/CobbleDollars-fabric-${rootProject.property("cobbledollars")}.jar"))
 }
+
+// A way to make the built jar always fat:
+// tasks.build {
+//     dependsOn(tasks.remapProductionJar)
+// }
 
 tasks {
     processResources {

@@ -34,7 +34,7 @@ import net.impactdev.impactor.api.economy.accounts.Account;
 import net.impactdev.impactor.api.economy.currency.Currency;
 import net.impactdev.impactor.api.economy.events.EconomyTransactionEvent;
 import net.impactdev.impactor.api.economy.events.EconomyTransferTransactionEvent;
-import net.impactdev.impactor.api.economy.transactions.composer.TransactionComposer;
+// import net.impactdev.impactor.api.economy.transactions.composer.TransactionComposer;
 import net.impactdev.impactor.api.economy.transactions.details.EconomyResultType;
 import net.impactdev.impactor.api.economy.transactions.EconomyTransaction;
 import net.impactdev.impactor.api.economy.transactions.details.EconomyTransactionType;
@@ -52,7 +52,7 @@ import net.impactdev.impactor.core.economy.transactions.ImpactorEconomyTransferT
 import net.impactdev.impactor.core.economy.transactions.composers.BaseTransactionComposer;
 import net.impactdev.impactor.core.economy.transactions.composers.TransferTransactionComposer;
 import net.impactdev.impactor.core.plugin.BaseImpactorPlugin;
-import net.impactdev.impactor.core.utility.future.Futures;
+// import net.impactdev.impactor.core.utility.future.Futures;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.kyori.event.PostResult;
@@ -63,12 +63,18 @@ import java.math.BigDecimal;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
+// import java.util.concurrent.CompletableFuture;
+// import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import net.impactdev.impactor.minecraft.api.items.CobbleDollarsBridge;
+
 public final class ImpactorAccount implements Account {
+	private static final Logger LOGGER = LoggerFactory.getLogger("CobbleDollars Impactor Bridge");
 
     private final EconomyService service = Impactor.instance()
             .services()
@@ -77,7 +83,7 @@ public final class ImpactorAccount implements Account {
     private final UUID owner;
     private final Currency currency;
     private final boolean virtual;
-    private BigDecimal balance;
+    // private BigDecimal balance;
 
     private ImpactorAccount(ImpactorAccountBuilder builder) {
         this(builder.currency, builder.owner, builder.virtual, Optional.ofNullable(builder.balance).orElse(builder.currency.defaultAccountBalance()));
@@ -86,7 +92,7 @@ public final class ImpactorAccount implements Account {
     private ImpactorAccount(Currency currency, UUID owner, boolean virtual, BigDecimal balance) {
         this.owner = owner;
         this.currency = currency;
-        this.balance = balance;
+        // this.balance = balance;
         this.virtual = virtual;
     }
 
@@ -111,16 +117,23 @@ public final class ImpactorAccount implements Account {
 
     @Override
     public @NotNull BigDecimal balance() {
-        return this.balance;
+        return CobbleDollarsBridge.balance(owner);
     }
 
     @ApiStatus.Internal
     void setViaNetworking(BigDecimal amount, EconomyTransactionType type) {
+        // switch (type) {
+        //     case DEPOSIT -> this.balance = this.balance.add(amount);
+        //     case WITHDRAW -> this.balance = this.balance.subtract(amount);
+        //     case SET -> this.balance = amount;
+        //     case RESET -> this.balance = this.currency.defaultAccountBalance();
+        // }
         switch (type) {
-            case DEPOSIT -> this.balance = this.balance.add(amount);
-            case WITHDRAW -> this.balance = this.balance.subtract(amount);
-            case SET -> this.balance = amount;
-            case RESET -> this.balance = this.currency.defaultAccountBalance();
+            case DEPOSIT -> CobbleDollarsBridge.deposit(owner, amount);
+            case WITHDRAW -> CobbleDollarsBridge.withdraw(owner, amount);
+            case SET -> CobbleDollarsBridge.set(owner, amount);
+            case RESET -> CobbleDollarsBridge.reset(owner);
+            case TRANSFER -> LOGGER.info("Tried networking transaction of type: \"TRANSFER\"");
         }
     }
 
@@ -153,7 +166,9 @@ public final class ImpactorAccount implements Account {
                     } else if(restrict && this.restriction(EconomyConfig.MAX_BALANCE).map(value -> amount.compareTo(value) > 0).orElse(false)) {
                         return this.createAndFirePost(this.complete(builder, EconomyResultType.INVALID, composer.messages()));
                     } else {
-                        this.balance = amount;
+                        // this.balance = amount;
+                        CobbleDollarsBridge.set(owner, amount);
+
                         this.save();
                         return this.createAndFirePost(this.complete(builder, EconomyResultType.SUCCESS, composer.messages()));
                     }
@@ -190,7 +205,7 @@ public final class ImpactorAccount implements Account {
                         return this.complete(builder, EconomyResultType.CANCELLED, composer.messages());
                     }
 
-                    BigDecimal result = this.balance.subtract(amount);
+                    BigDecimal result = this.balance().subtract(amount);
                     if(this.restriction(EconomyConfig.APPLY_RESTRICTIONS).orElse(false)) {
                         Optional<BigDecimal> minimum = this.restriction(EconomyConfig.MIN_BALANCE);
                         if(minimum.isPresent() && minimum.get().compareTo(result) > 0) {
@@ -202,7 +217,9 @@ public final class ImpactorAccount implements Account {
                         return this.createAndFirePost(this.complete(builder, EconomyResultType.NOT_ENOUGH_FUNDS, composer.messages()));
                     }
 
-                    this.balance = result;
+                    // this.balance = result;
+                    CobbleDollarsBridge.set(owner, result);
+
                     this.save();
                     return this.createAndFirePost(this.complete(builder, EconomyResultType.SUCCESS, composer.messages()));
                 }, () -> ImpactorEconomyTransaction.builder()
@@ -238,7 +255,7 @@ public final class ImpactorAccount implements Account {
                         return this.complete(builder, EconomyResultType.CANCELLED, composer.messages());
                     }
 
-                    BigDecimal result = this.balance.add(amount);
+                    BigDecimal result = this.balance().add(amount);
                     if(this.restriction(EconomyConfig.APPLY_RESTRICTIONS).orElse(false)) {
                         Optional<BigDecimal> maximum = this.restriction(EconomyConfig.MAX_BALANCE);
                         if(maximum.isPresent() && maximum.get().compareTo(result) < 0) {
@@ -246,7 +263,9 @@ public final class ImpactorAccount implements Account {
                         }
                     }
 
-                    this.balance = result;
+                    // this.balance = result;
+                    CobbleDollarsBridge.set(owner, result);
+
                     this.save();
                     return this.createAndFirePost(this.complete(builder, EconomyResultType.SUCCESS, composer.messages()));
                 }, () -> ImpactorEconomyTransaction.builder()
@@ -301,7 +320,7 @@ public final class ImpactorAccount implements Account {
                     return this.complete(builder, EconomyResultType.CANCELLED, composer.messages());
                 }
 
-                BigDecimal withdraw = this.balance.subtract(amount);
+                BigDecimal withdraw = this.balance().subtract(amount);
                 BigDecimal deposit = to.balance().add(amount);
                 if(this.restriction(EconomyConfig.APPLY_RESTRICTIONS).orElse(false)) {
                     Optional<BigDecimal> minimum = this.restriction(EconomyConfig.MIN_BALANCE);
@@ -323,8 +342,10 @@ public final class ImpactorAccount implements Account {
                     }
                 }
 
-                this.balance = this.balance.subtract(amount);
-                ((ImpactorAccount) to).quietSet(to.balance().add(amount));
+                // this.balance = this.balance.subtract(amount);
+                // ((ImpactorAccount) to).quietSet(to.balance().add(amount));
+                CobbleDollarsBridge.set(owner, withdraw);
+                CobbleDollarsBridge.set(to.owner(), deposit);
 
                 this.save();
                 ((ImpactorAccount) to).save();
@@ -367,7 +388,9 @@ public final class ImpactorAccount implements Account {
                         return builder.result(EconomyResultType.CANCELLED).build();
                     }
 
-                    this.balance = this.currency.defaultAccountBalance();
+                    // this.balance = this.currency.defaultAccountBalance();
+                    CobbleDollarsBridge.reset(owner);
+
                     this.save();
                     return this.createAndFirePost(builder.result(EconomyResultType.SUCCESS).build());
                 }, () -> ImpactorEconomyTransaction.builder()
@@ -378,10 +401,6 @@ public final class ImpactorAccount implements Account {
                         .result(EconomyResultType.FAILED)
                         .build()
         );
-    }
-
-    private void quietSet(BigDecimal amount) {
-        this.balance = amount;
     }
 
     private void save() {
@@ -518,3 +537,17 @@ public final class ImpactorAccount implements Account {
         }
     }
 }
+
+// RANDOM STUFF THAT MIGHT BE USEFUL:
+
+// import fr.harmex.cobbledollars.common.CobbleDollars;
+// import fr.harmex.cobbledollars.common.world.cobbledollars.CobbleDollarsAccount;
+// import net.impactdev.impactor.fabric.FabricImpactorBootstrap;
+
+// import com.mojang.authlib.GameProfile;
+// import net.impactdev.impactor.minecraft.api.items.ServerProvider;
+// import net.minecraft.server.MinecraftServer;
+
+// LOGGER.info("Created new impactor account!");
+// Bridge.getAccount(owner);
+// Bridge.executeCommand("say hello");

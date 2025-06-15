@@ -18,6 +18,8 @@ minecraft {
 dependencies {
     api(project(":api:items"))
     api(project(":api:ui"))
+    
+    implementation(files("../../libs/CobbleDollars-fabric-${rootProject.property("cobbledollars")}.jar"))
 }
 
 publishing {
